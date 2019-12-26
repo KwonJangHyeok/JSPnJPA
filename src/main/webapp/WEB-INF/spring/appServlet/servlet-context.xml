@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans
+	xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.1.xsd
+		http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
+	<!-- DispatcherServlet Context: defines this servlet's request-processing 
+		infrastructure -->
+
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<annotation-driven />
+	<tx:annotation-driven
+		transaction-manager="jpaTransactionManager" />
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving 
+		up static resources in the ${webappRoot}/resources directory -->
+	<resources mapping="/resources/**" location="/resources/" />
+
+	<!-- Resolves views selected for rendering by @Controllers to .jsp resources 
+		in the /WEB-INF/views directory -->
+	<beans:bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+	</beans:bean>
+	<context:annotation-config />
+
+
+	<!-- <context:component-scan base-package="com.mycompany.ap" /> -->
+
+	<!-- JPA 예외를 스프링 예외로 변환 -->
+	<beans:bean
+		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+
+	<beans:bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<beans:property name="dataSource" ref="dataSource" />
+	</beans:bean>
+
+
+
+	<!-- JPA 설정 ( 엔티티 매니저 팩토리 등록 ) -->
+	<beans:bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<beans:property name="dataSource" ref="dataSource" />
+		
+		<!-- @Entity 탐색 범위 -->
+		<beans:property name="packagesToScan"
+			value="com.mycompany.ap" />
+		<!-- 하이버네이트 구현체 사용 -->
+		<beans:property name="jpaVendorAdapter">
+			<beans:bean
+				class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+		</beans:property>
+		
+		<!-- <beans:property name="jpaProperties">
+            <beans:props>
+                <beans:prop key="hibernate.show_sql">true</beans:prop>
+                 
+                <beans:prop key="hibernate.use_sql_comments">true</beans:prop>
+                
+                <beans:prop key="hibernate.format_sql">true</beans:prop>
+                <beans:prop key="hibernate.id.new_generator_mappings">true</beans:prop>
+                <beans:prop key="hibernate.hbm2ddl.auto">create</beans:prop>
+            </beans:props>
+        </beans:property> -->
+	</beans:bean>
+
+	<beans:bean id="jpaTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<beans:property name="entityManagerFactory" ref="entityManagerFactory"></beans:property>
+	</beans:bean>
+
+	<!-- Connection Pool DataSource -->
+	<beans:bean id="dataSource"
+		class="org.apache.commons.dbcp.BasicDataSource">
+		<beans:property name="driverClassName"
+			value="oracle.jdbc.OracleDriver" />
+		<beans:property name="url"
+			value="jdbc:oracle:thin:@172.17.21.48:1521:RTDB" />
+		<beans:property name="username" value="EMS" />
+		<beans:property name="password" value="SME" />
+	</beans:bean>
+
+	<!-- jdbc.ems.url=jdbc:oracle:thin:@172.17.21.48:1521:RTDB jdbc.ems.username=EMS 
+		jdbc.ems.password=SME -->
+	<context:component-scan
+		base-package="com.mycompany.*">
+		<context:include-filter type="annotation"
+			expression="org.springframework.stereotype.Repository" />
+		<context:include-filter type="annotation"
+			expression="org.springframework.stereotype.Service" />
+		<context:include-filter type="annotation"
+			expression="org.springframework.stereotype.Component" />
+	</context:component-scan>
+	<jpa:repositories base-package="com.mycompany.ap"></jpa:repositories>
+
+
+</beans:beans>
